@@ -1,50 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mirror Viewer</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tool</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #url { width: 60%; padding: 8px; }
-        button { padding: 8px 15px; }
-        iframe { width: 100%; height: 80vh; border: 1px solid #ccc; margin-top: 10px; }
-        .warning { color: red; margin: 10px 0; }
+        body { font-family: Arial, margin: 20px; }
+        #study-frame { width: 100%; height: 90vh; border: none; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>Website Viewer</h1>
-    <input type="text" id="url" placeholder="https://example.com" value="">
-    <button onclick="loadSite()">Load</button>
-    <div class="warning">Note: Some sites may block this viewer</div>
-    
-    <iframe id="mirror" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    <h1>Study Resources</h1>
+    <iframe id="study-frame" src="about:blank" sandbox="allow-scripts allow-same-origin"></iframe>
 
     <script>
-        // List of public CORS proxies (rotating to avoid rate limits)
-        const proxies = [
-            'https://cors-anywhere.herokuapp.com/',
-            'https://api.allorigins.win/get?url=',
-            'https://yacdn.org/proxy/',
-            'https://corsproxy.io/?'
-        ];
-        
-        function loadSite() {
-            let url = document.getElementById('url').value.trim();
-            if (!url.startsWith('http')) url = 'https://' + url;
-            
-            // Random proxy selection
-            const proxy = proxies[Math.floor(Math.random() * proxies.length)];
-            const proxyUrl = proxy + encodeURIComponent(url);
-            
-            document.getElementById('mirror').src = proxyUrl;
-        }
-        
-        // Load default site on startup
-        window.onload = function() {
-            document.getElementById('url').value = 'https://example.com';
-            loadSite();
+        // Disguise the proxy as a study tool
+        const sites = {
+            "Google": "https://www.google.com",
+            "Wikipedia": "https://www.wikipedia.org",
+            "Custom": null
         };
+
+        // Create a fake dropdown
+        const select = document.createElement('select');
+        select.innerHTML = Object.keys(sites).map(site => 
+            `<option value="${site}">${site}</option>`
+        ).join('') + '<option value="Custom">Custom URL</option>';
+
+        // Hidden URL input
+        const urlInput = document.createElement('input');
+        urlInput.type = "text";
+        urlInput.id = "custom-url";
+        urlInput.placeholder = "Enter study resource URL";
+        urlInput.className = "hidden";
+
+        select.addEventListener('change', (e) => {
+            if (e.target.value === "Custom") {
+                urlInput.classList.remove('hidden');
+            } else {
+                urlInput.className = "hidden";
+                loadSite(sites[e.target.value]);
+            }
+        });
+
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadSite(e.target.value);
+        });
+
+        document.body.prepend(urlInput);
+        document.body.prepend(select);
+
+        // Obfuscated loading via Base64 redirect
+        function loadSite(url) {
+            if (!url) return;
+            const frame = document.getElementById('study-frame');
+            frame.src = `data:text/html;base64,${btoa(`
+                <script>
+                    window.location.href = "${url}";
+                <\/script>
+            `)}`;
+        }
     </script>
 </body>
 </html>
