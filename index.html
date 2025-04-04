@@ -1,84 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Educational Resource Portal</title>
+    <title>Math Calculator</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        #frame-container { position: relative; height: 70vh; }
-        #loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        #content-frame { width: 100%; height: 100%; border: 1px solid #ddd; display: none; }
-        .url-input { display: flex; margin-bottom: 15px; }
-        #url { flex: 1; padding: 8px; border: 1px solid #ccc; }
-        button { padding: 8px 15px; background: #4285f4; color: white; border: none; cursor: pointer; }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #calculator { margin: 20px auto; padding: 20px; border: 1px solid #ccc; max-width: 500px; }
+        #result { font-size: 24px; margin: 20px; }
+        #hidden-frame { display: none; }
     </style>
 </head>
 <body>
-    <h1>Educational Resource Portal</h1>
-    <div class="url-input">
-        <input type="text" id="url" placeholder="Enter educational resource URL">
-        <button onclick="loadResource()">Load Resource</button>
+    <h1>Advanced Math Calculator</h1>
+    <div id="calculator">
+        <input type="number" id="num1" placeholder="Enter number">
+        <select id="operator">
+            <option value="add">+</option>
+            <option value="subtract">-</option>
+        </select>
+        <input type="number" id="num2" placeholder="Enter number">
+        <button onclick="calculate()">Calculate</button>
+        <div id="result"></div>
     </div>
-    
-    <div id="frame-container">
-        <div id="loader">Loading educational content...</div>
-        <iframe id="content-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-    </div>
+
+    <!-- Hidden proxy mechanism -->
+    <iframe id="hidden-frame" sandbox="allow-scripts allow-same-origin"></iframe>
 
     <script>
-        // List of educational domains that might be whitelisted
-        const gatewayDomains = [
-            'https://docs.google.com/gview?url=',
-            'https://translate.google.com/translate?sl=auto&tl=en&u=',
-            'https://web.archive.org/web/'
-        ];
-
-        function loadResource() {
-            const rawUrl = document.getElementById('url').value.trim();
-            if (!rawUrl) return;
+        // Real calculator function (for disguise)
+        function calculate() {
+            const num1 = parseFloat(document.getElementById('num1').value);
+            const num2 = parseFloat(document.getElementById('num2').value);
+            const operator = document.getElementById('operator').value;
             
-            let url = rawUrl;
-            if (!url.startsWith('http')) url = 'https://' + url;
+            let result;
+            if (operator === 'add') result = num1 + num2;
+            else result = num1 - num2;
             
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('content-frame').style.display = 'none';
-            
-            // Try different loading methods
-            tryMethod(0, url);
+            document.getElementById('result').innerText = `Result: ${result}`;
         }
 
-        function tryMethod(index, url) {
-            if (index >= gatewayDomains.length) {
-                // Fallback to direct loading
-                loadDirect(url);
-                return;
-            }
-            
-            const frame = document.getElementById('content-frame');
-            frame.src = gatewayDomains[index] + encodeURIComponent(url);
-            
-            frame.onload = frame.onerror = () => {
+        // Secret URL loader (trigger via URL hash)
+        window.onload = function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const decoded = atob(hash);
+                document.getElementById('hidden-frame').src = decoded;
+                
+                // Optional: Auto-redirect after delay
                 setTimeout(() => {
-                    if (frame.contentDocument && 
-                        frame.contentDocument.body.innerText.length > 100) {
-                        // Success
-                        document.getElementById('loader').style.display = 'none';
-                        frame.style.display = 'block';
-                    } else {
-                        // Try next method
-                        tryMethod(index + 1, url);
-                    }
-                }, 2000);
-            };
-        }
-
-        function loadDirect(url) {
-            const frame = document.getElementById('content-frame');
-            frame.src = url;
-            frame.onload = frame.onerror = () => {
-                document.getElementById('loader').style.display = 'none';
-                frame.style.display = 'block';
-            };
-        }
+                    window.location = decoded;
+                }, 3000);
+            }
+        };
     </script>
 </body>
 </html>
